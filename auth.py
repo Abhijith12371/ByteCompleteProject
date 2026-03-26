@@ -108,6 +108,11 @@ def send_verification_email(recipient_email: str, token: str):
     smtp_username = os.getenv("SMTP_USERNAME")
     smtp_password = os.getenv("SMTP_PASSWORD")
     
+    if not smtp_username:
+        print("❌ ERROR: SMTP_USERNAME is not set in environment variables.")
+    if not smtp_password:
+        print("❌ ERROR: SMTP_PASSWORD is not set in environment variables.")
+        
     if not smtp_username or not smtp_password:
         return False
         

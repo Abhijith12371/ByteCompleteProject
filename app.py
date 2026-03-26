@@ -25,11 +25,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://byte-report-generator.netlify.app"
-    ],  # Allows local dev and production frontend
+        "https://byte-report-generator.netlify.app",
+        "https://byte-report-generator.netlify.app/"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 app.include_router(auth_router)
