@@ -116,7 +116,7 @@ def send_verification_email(recipient_email: str, token: str):
     msg['From'] = smtp_username
     msg['To'] = recipient_email
     
-    verify_link = f"http://localhost:5173/verify?token={token}"
+    verify_link = f"https://byte-report-generator.netlify.app/verify?token={token}"
     msg.set_content(f"""\
 Hello,
 
@@ -197,7 +197,7 @@ def send_verification_email_with_logging(email, token):
         print(f"To: {email}")
         print("Subject: Verify Your ByTE Account")
         print("\nPlease click the link below to verify your account:")
-        print(f"http://localhost:5173/verify?token={token}")
+        print(f"https://byte-report-generator.netlify.app/verify?token={token}")
         print("="*50 + "\n")
 
 @router.get("/verify-email")

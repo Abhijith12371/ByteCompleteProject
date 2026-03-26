@@ -23,7 +23,10 @@ app = FastAPI(title="ByTE Report Generator API")
 # Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=[
+        "http://localhost:5173",
+        "https://byte-report-generator.netlify.app"
+    ],  # Allows local dev and production frontend
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
