@@ -9,7 +9,7 @@ const History = ({ token }) => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await fetch('/my-reports', {
+                const response = await fetch('https://byteproject.onrender.com/my-reports', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -38,7 +38,7 @@ const History = ({ token }) => {
         try {
             // Option 1: Direct download using window.open (simplest and works best)
             window.open(downloadUrl, '_blank');
-            
+
             // Option 2: If you want to track download completion, use this:
             // const link = document.createElement('a');
             // link.href = downloadUrl;
@@ -46,7 +46,7 @@ const History = ({ token }) => {
             // document.body.appendChild(link);
             // link.click();
             // document.body.removeChild(link);
-            
+
         } catch (err) {
             console.error('Download error:', err);
             alert('Failed to download file. Please try again.');

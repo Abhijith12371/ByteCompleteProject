@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from passlib.context import CryptContext
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 from pydantic import BaseModel
@@ -129,7 +129,7 @@ If you did not request this, please ignore this email.
 """)
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
             server.starttls()
             server.login(smtp_username, smtp_password)
             server.send_message(msg)
@@ -139,7 +139,11 @@ If you did not request this, please ignore this email.
         return False
 
 @router.post("/register")
-def register(user: UserCreate, db: mysql.connector.MySQLConnection = Depends(get_db)):
+def register(
+    user: UserCreate, 
+    background_tasks: BackgroundTasks,
+    db: mysql.connector.MySQLConnection = Depends(get_db)
+):
     cursor = db.cursor()
     
     # Check if email already exists
@@ -180,19 +184,21 @@ def register(user: UserCreate, db: mysql.connector.MySQLConnection = Depends(get
         print(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Registration failed")
     
-    # Try sending real email; fallback to console if unconfigured or fails
-    email_sent = send_verification_email(user.email, verification_token)
-    
+    # Add email sending to background tasks
+    background_tasks.add_task(send_verification_email_with_logging, user.email, verification_token)
+
+    return {"message": "Registration successful. Please check your email to verify your account."}
+
+def send_verification_email_with_logging(email, token):
+    email_sent = send_verification_email(email, token)
     if not email_sent:
         print("\n" + "="*50)
         print("📧 MOCK EMAIL SENT (Add SMTP credentials to .env to send real ones!) 📧")
-        print(f"To: {user.email}")
+        print(f"To: {email}")
         print("Subject: Verify Your ByTE Account")
         print("\nPlease click the link below to verify your account:")
-        print(f"http://localhost:5173/verify?token={verification_token}")
+        print(f"http://localhost:5173/verify?token={token}")
         print("="*50 + "\n")
-
-    return {"message": "Registration successful. Please check your email to verify your account."}
 
 @router.get("/verify-email")
 def verify_email(token: str, db: mysql.connector.MySQLConnection = Depends(get_db)):

@@ -91,7 +91,7 @@ const App = () => {
     setContactStatus({ type: 'info', message: 'Sending message...' });
 
     try {
-      const response = await fetch('/contact', {
+      const response = await fetch('https://byteproject.onrender.com/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -158,7 +158,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('/generate-reports', {
+      const response = await fetch('https://byteproject.onrender.com/generate-reports', {
         method: 'POST',
         body: formData,
         headers: {

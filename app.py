@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 import mysql.connector
 from mysql.connector import Error
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, Request, Form, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -18,6 +19,16 @@ from auth import router as auth_router, get_current_user, get_db
 from urllib.parse import urlparse
 
 app = FastAPI(title="ByTE Report Generator API")
+
+# Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 app.include_router(auth_router)
 
 # Setup templates and static files
