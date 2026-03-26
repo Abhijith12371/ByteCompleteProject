@@ -134,10 +134,17 @@ If you did not request this, please ignore this email.
 """)
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
-            server.starttls()
-            server.login(smtp_username, smtp_password)
-            server.send_message(msg)
+        if smtp_port == 465:
+            # For SSL (Port 465)
+            with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10) as server:
+                server.login(smtp_username, smtp_password)
+                server.send_message(msg)
+        else:
+            # For TLS (Port 587)
+            with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
+                server.starttls()
+                server.login(smtp_username, smtp_password)
+                server.send_message(msg)
         return True
     except Exception as e:
         print(f"Failed to send real email: {e}")
