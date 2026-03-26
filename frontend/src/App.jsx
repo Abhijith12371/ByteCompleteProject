@@ -9,45 +9,103 @@ import History from './History';
 gsap.registerPlugin(ScrollTrigger);
 
 const Navbar = ({ isAuthenticated, onLogout, currentView, onViewChange }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const navLinks = ['Home', 'About', 'How it Works', 'Contact Us'];
+
   return (
-    <nav className="w-full px-[5%] py-6 flex justify-between items-center max-w-[1400px] mx-auto z-50 relative">
-      <div className="flex items-center gap-2 cursor-pointer" onClick={() => onViewChange && onViewChange('generator')}>
-        <div className="flex items-center gap-2">
-          <img src="/normalImage.png" alt="Logo Icon" className="w-10 h-10 object-contain drop-shadow-md" />
-          <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
-            ByTE <span className="font-medium opacity-80">Report Generator</span>
-          </span>
-        </div>
-      </div>
-
-      <div className="hidden md:flex items-center gap-8">
-        {['Home', 'About', 'How it Works', 'Contact Us'].map((link) => (
-          <a key={link} href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-            {link}
-          </a>
-        ))}
-        {isAuthenticated ? (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => onViewChange(currentView === 'generator' ? 'history' : 'generator')}
-              className="text-white/80 hover:text-white transition-colors text-sm font-bold uppercase tracking-wide"
-            >
-              {currentView === 'generator' ? 'My Reports' : 'Generate'}
-            </button>
-            <button onClick={onLogout} className="btn-green text-sm !bg-red-500/20 !text-red-400 !border-red-500/50 hover:!bg-red-500 hover:!text-white">
-              Logout
-            </button>
+    <nav className="fixed top-0 left-0 w-full px-[5%] py-4 flex justify-between items-center z-[100] transition-all duration-300 bg-black/20 backdrop-blur-lg border-b border-white/5">
+      <div className="max-w-[1400px] w-full mx-auto flex justify-between items-center">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
+          onViewChange && onViewChange('generator');
+          setIsMenuOpen(false);
+        }}>
+          <div className="flex items-center gap-2">
+            <img src="/normalImage.png" alt="Logo Icon" className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-md" />
+            <span className="text-xl md:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
+              ByTE <span className="font-medium opacity-80 hidden sm:inline">Report Generator</span>
+            </span>
           </div>
-        ) : (
-          <button className="btn-green text-sm">
-            Generate Report Now
-          </button>
-        )}
-      </div>
+        </div>
 
-      <div className="md:hidden flex flex-col gap-1.5 cursor-pointer">
-        <span className="block h-0.5 w-6 bg-white"></span>
-        <span className="block h-0.5 w-6 bg-white"></span>
+        {/* Desktop Links */}
+        <div className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <a key={link} href={`#${link.toLowerCase().replace(/\s+/g, '-')}`} className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+              {link}
+            </a>
+          ))}
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => onViewChange(currentView === 'generator' ? 'history' : 'generator')}
+                className="text-white/80 hover:text-white transition-colors text-sm font-bold uppercase tracking-wide"
+              >
+                {currentView === 'generator' ? 'My Reports' : 'Generate'}
+              </button>
+              <button onClick={onLogout} className="btn-green text-sm !bg-red-500/20 !text-red-400 !border-red-500/50 hover:!bg-red-500 hover:!text-white">
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button className="btn-green text-sm">
+              Generate Report Now
+            </button>
+          )}
+        </div>
+
+        {/* Mobile Toggle */}
+        <div
+          className="md:hidden flex flex-col gap-1.5 cursor-pointer z-[110]"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        <div className={`fixed inset-0 bg-black/95 backdrop-blur-2xl z-[105] flex flex-col items-center justify-center gap-8 transition-all duration-500 md:hidden ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+          {navLinks.map((link) => (
+            <a
+              key={link}
+              href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
+              onClick={() => setIsMenuOpen(false)}
+              className="text-2xl font-bold text-white hover:text-byte-green transition-colors"
+            >
+              {link}
+            </a>
+          ))}
+          {isAuthenticated ? (
+            <div className="flex flex-col items-center gap-6 mt-4">
+              <button
+                onClick={() => {
+                  onViewChange(currentView === 'generator' ? 'history' : 'generator');
+                  setIsMenuOpen(false);
+                }}
+                className="text-xl font-bold text-byte-green uppercase tracking-widest"
+              >
+                {currentView === 'generator' ? 'My Reports' : 'Generate Reports'}
+              </button>
+              <button
+                onClick={() => {
+                  onLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="px-8 py-3 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 text-lg font-bold"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              className="btn-green text-lg px-10 py-4 mt-4"
+            >
+              Get Started
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );
