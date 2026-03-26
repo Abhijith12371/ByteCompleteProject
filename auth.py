@@ -186,9 +186,10 @@ def register(
         counter += 1
     
     try:
+        # Set is_verified=True (1) directly to bypass email verification
         cursor.execute(
             "INSERT INTO byte (email, username, password, is_verified, verification_token) VALUES (%s, %s, %s, %s, %s)", 
-            (user.email, username, hashed_password, False, verification_token)
+            (user.email, username, hashed_password, True, verification_token)
         )
         db.commit()
     except Error as e:
@@ -196,11 +197,9 @@ def register(
         print(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Registration failed")
     
-    # Add email sending to background tasks
-    print(f"DEBUG: Registering user {user.email}. Adding email task to background.")
-    background_tasks.add_task(send_verification_email_with_logging, user.email, verification_token)
+    print(f"DEBUG: Registering user {user.email}. Verification bypassed (Auto-verified).")
 
-    return {"message": "Registration successful. Please check your email to verify your account."}
+    return {"message": "Registration successful! You can now log in."}
 
 def send_verification_email_with_logging(email, token):
     print(f"DEBUG: Attempting to send verification email to {email}...")

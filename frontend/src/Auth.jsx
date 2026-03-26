@@ -22,7 +22,7 @@ const Auth = ({ onLogin }) => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    setStatus({ type: 'success', message: 'Registration successful! Please check your email to verify your account.' });
+                    setStatus({ type: 'success', message: data.message || 'Registration successful! You can now log in.' });
                     setIsRegister(false);
                 } else {
                     setStatus({ type: 'error', message: data.detail || 'Registration failed' });
