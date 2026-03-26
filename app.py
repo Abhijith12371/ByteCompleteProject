@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from main import generate_llm_analysis, create_word_doc
 from src.data_loader import load_and_process_data
-from auth import router as auth_router, get_current_user, get_db
+from auth import router as auth_router, get_current_user, get_db, init_db
 from urllib.parse import urlparse
 
 app = FastAPI(title="ByTE Report Generator API")
@@ -34,6 +34,11 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 App starting up... initializing database")
+    init_db()
 
 # Setup templates and static files
 app.mount("/static", StaticFiles(directory="static"), name="static")

@@ -78,8 +78,8 @@ def init_db():
     except Error as e:
         print(f"Error initializing database: {e}")
 
-# Run initialization
-init_db()
+# Run initialization (Removed from top-level to prevent startup timeout)
+# init_db()
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
