@@ -185,13 +185,17 @@ def register(
         raise HTTPException(status_code=500, detail="Registration failed")
     
     # Add email sending to background tasks
+    print(f"DEBUG: Registering user {user.email}. Adding email task to background.")
     background_tasks.add_task(send_verification_email_with_logging, user.email, verification_token)
 
     return {"message": "Registration successful. Please check your email to verify your account."}
 
 def send_verification_email_with_logging(email, token):
+    print(f"DEBUG: Attempting to send verification email to {email}...")
     email_sent = send_verification_email(email, token)
-    if not email_sent:
+    if email_sent:
+        print(f"✅ SUCCESS: Verification email sent to {email}")
+    else:
         print("\n" + "="*50)
         print("📧 MOCK EMAIL SENT (Add SMTP credentials to .env to send real ones!) 📧")
         print(f"To: {email}")
