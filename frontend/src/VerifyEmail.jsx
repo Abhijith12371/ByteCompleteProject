@@ -14,7 +14,7 @@ const VerifyEmail = () => {
 
         const verifyToken = async () => {
             try {
-                const response = await fetch(`https://byteproject.onrender.com/verify-email?token=${token}`);
+                const response = await fetch(`http://localhost:8000/verify-email?token=${token}`);
                 const data = await response.json();
                 if (response.ok) {
                     setStatus({ type: 'success', message: data.message || 'Email verified successfully!' });

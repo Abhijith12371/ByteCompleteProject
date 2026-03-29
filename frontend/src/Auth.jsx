@@ -14,7 +14,7 @@ const Auth = ({ onLogin }) => {
 
         try {
             if (isRegister) {
-                const response = await fetch('https://byteproject.onrender.com/register', {
+                const response = await fetch('http://localhost:8000/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -32,7 +32,7 @@ const Auth = ({ onLogin }) => {
                 formData.append('username', email); // OAuth2 expects 'username' field, we pass email
                 formData.append('password', password);
 
-                const response = await fetch('https://byteproject.onrender.com/login', {
+                const response = await fetch('http://localhost:8000/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData

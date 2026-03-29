@@ -9,7 +9,7 @@ const History = ({ token }) => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const response = await fetch('https://byteproject.onrender.com/my-reports', {
+                const response = await fetch('http://localhost:8000/my-reports', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

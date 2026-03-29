@@ -149,7 +149,7 @@ const App = () => {
     setContactStatus({ type: 'info', message: 'Sending message...' });
 
     try {
-      const response = await fetch('https://byteproject.onrender.com/contact', {
+      const response = await fetch('http://localhost:8000/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -216,7 +216,7 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('https://byteproject.onrender.com/generate-reports', {
+      const response = await fetch('http://localhost:8000/generate-reports', {
         method: 'POST',
         body: formData,
         headers: {
@@ -225,15 +225,17 @@ const App = () => {
       });
       if (response.ok) {
         clearInterval(interval);
+        const data = await response.json();
+        const downloadUrl = data.download_url;
+        const filename = data.file_name || 'report.zip';
+
         setProgress(100);
         setStatus({ type: 'success', message: 'Report generated successfully!' });
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        setDownloadUrl(url);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'report.zip';
-        a.click();
+
+        // Update state and trigger download
+        setDownloadUrl(downloadUrl);
+        window.open(downloadUrl, '_blank');
+
         setLoading(false);
       } else {
         if (response.status === 401) {
@@ -358,10 +360,13 @@ const App = () => {
                         <div className="p-4 rounded-xl text-byte-green bg-byte-green/10 border border-byte-green/30 text-lg font-bold">
                           {status.message || 'Report generated successfully!'}
                         </div>
-                        <a href={downloadUrl} download="report.zip" className="btn-green text-xl py-4 px-10 rounded-xl shadow-[0_0_20px_rgba(118,200,89,0.4)] hover:shadow-[0_0_30px_rgba(118,200,89,0.6)] no-underline flex items-center justify-center gap-3">
+                        <button
+                          onClick={() => window.open(downloadUrl, '_blank')}
+                          className="btn-green text-xl py-4 px-10 rounded-xl shadow-[0_0_20px_rgba(118,200,89,0.4)] hover:shadow-[0_0_30px_rgba(118,200,89,0.6)] no-underline flex items-center justify-center gap-3"
+                        >
                           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                           Download Reports (ZIP)
-                        </a>
+                        </button>
                         <button onClick={() => {
                           setFile(null);
                           setDownloadUrl(null);

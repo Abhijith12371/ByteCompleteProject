@@ -80,12 +80,18 @@ def upload_to_s3(file_path, user_id, file_name):
         # Create S3 key with user_id folder structure
         s3_key = f"{user_id}/{file_name}"
         
+        # Extract the original filename (without the user_id and request_id prefix) for the download header
+        display_name = file_name.split("_", 2)[-1] if "_" in file_name else file_name
+        
         # Upload file to S3
         s3_client.upload_file(
             file_path,
             AWS_BUCKET_NAME,
             s3_key,
-            ExtraArgs={'ContentType': 'application/zip'}
+            ExtraArgs={
+                'ContentType': 'application/zip',
+                'ContentDisposition': f'attachment; filename="{display_name}"'
+            }
         )
         
         # Generate S3 URL
