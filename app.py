@@ -185,33 +185,47 @@ async def generate_reports(
 
         final_class_name = internal_class if internal_class else os.path.splitext(file.filename)[0]
 
-        # Generate reports
+        from docx import Document
+        from docx.shared import Inches
+        
+        # Initialize a single consolidated document
+        consolidated_doc = Document()
+        
+        # Set narrow margins once for the consolidated doc
+        sections = consolidated_doc.sections
+        for section in sections:
+            section.top_margin = Inches(0.5)
+            section.bottom_margin = Inches(0.5)
+            section.left_margin = Inches(0.6)
+            section.right_margin = Inches(0.6)
+
+        final_class_name = internal_class if internal_class else os.path.splitext(file.filename)[0]
+
+        # Generate reports into the single document
         for idx, student in enumerate(students, 1):
             name = student.get('name', 'Unknown')
             analysis, meta = generate_llm_analysis(student, name, final_class_name)
             if analysis:
-                create_word_doc(name, analysis, final_class_name, student, class_avg, output_dir=output_dir)
+                # Pass the consolidated_doc to be appended to
+                create_word_doc(name, analysis, final_class_name, student, class_avg, 
+                                doc=consolidated_doc, save=False)
             else:
                 print(f"Failed to generate analysis for: {name}")
 
-        # Create ZIP file locally
-        zip_filename = f"{final_class_name}_Reports.zip"
-        unique_zip_name = f"{current_user['id']}_{request_id}_{zip_filename}"
-        zip_path = os.path.join(request_dir, unique_zip_name)
-        
-        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for root, dirs, files in os.walk(output_dir):
-                for f in files:
-                    zipf.write(os.path.join(root, f), f)
+        # Save single consolidated document
+        docx_filename = f"{final_class_name}_Reports.docx"
+        unique_docx_name = f"{current_user['id']}_{request_id}_{docx_filename}"
+        docx_path = os.path.join(request_dir, unique_docx_name)
+        consolidated_doc.save(docx_path)
 
-        # Upload ZIP to S3
-        s3_key, s3_url = upload_to_s3(zip_path, str(current_user['id']), unique_zip_name)
+        # Upload DOCX to S3
+        s3_key, s3_url = upload_to_s3(docx_path, str(current_user['id']), unique_docx_name)
 
         # Save report info to MySQL
         cursor = db.cursor()
         cursor.execute(
             "INSERT INTO reports (user_id, file_name, file_key, file_url) VALUES (%s, %s, %s, %s)", 
-            (current_user['id'], zip_filename, s3_key, s3_url)
+            (current_user['id'], docx_filename, s3_key, s3_url)
         )
         db.commit()
 
@@ -223,7 +237,7 @@ async def generate_reports(
             status_code=200,
             content={
                 "message": "Reports generated successfully",
-                "file_name": zip_filename,
+                "file_name": docx_filename,
                 "download_url": s3_url,
                 "report_id": cursor.lastrowid
             }

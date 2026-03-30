@@ -578,19 +578,22 @@ OUTPUT FORMAT (JSON ONLY)
 # =========================
 # WORD REPORT CREATION
 # =========================
-def create_word_doc(student_name, analysis, class_name, student_data, class_avg_data, output_dir=None):
-    doc = Document()
+def create_word_doc(student_name, analysis, class_name, student_data, class_avg_data, output_dir=None, doc=None, save=True):
+    if doc is None:
+        doc = Document()
+        # Set narrow margins (only for new document)
+        sections = doc.sections
+        for section in sections:
+            section.top_margin = Inches(0.5)
+            section.bottom_margin = Inches(0.5)
+            section.left_margin = Inches(0.6)
+            section.right_margin = Inches(0.6)
+    else:
+        # Add page break before adding new student if appending to existing doc
+        doc.add_page_break()
     
     # Use specified output_dir or fallback to global constant
     target_folder = output_dir if output_dir else OUTPUT_FOLDER
-    
-    # Set narrow margins
-    sections = doc.sections
-    for section in sections:
-        section.top_margin = Inches(0.5)
-        section.bottom_margin = Inches(0.5)
-        section.left_margin = Inches(0.6)
-        section.right_margin = Inches(0.6)
     
     # ========================================
     # PAGE 1: STUDENT INFO, PURPOSE, KEY INSIGHTS, CHART, OBSERVATIONS
@@ -622,8 +625,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     purpose_heading.style.font.size = Pt(11)
     purpose_heading.style.font.bold = True
     purpose_heading.style.font.color.rgb = RGBColor(0, 51, 102)
-    purpose_heading.paragraph_format.space_before = Pt(6)
-    purpose_heading.paragraph_format.space_after = Pt(2)
+    purpose_heading.paragraph_format.space_before = Pt(2)
+    purpose_heading.paragraph_format.space_after = Pt(1)
     
     purpose_text = doc.add_paragraph(
         '"Skill Assessment Program - Building Strengths Beyond Academics "\n'
@@ -639,8 +642,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     insights_heading.style.font.size = Pt(11)
     insights_heading.style.font.bold = True
     insights_heading.style.font.color.rgb = RGBColor(0, 51, 102)
-    insights_heading.paragraph_format.space_before = Pt(4)
-    insights_heading.paragraph_format.space_after = Pt(2)
+    insights_heading.paragraph_format.space_before = Pt(2)
+    insights_heading.paragraph_format.space_after = Pt(1)
     
     insights_text = doc.add_paragraph(
         'The graph below shows how your child is doing in different areas. It tells us what they like more and where we can '
@@ -657,15 +660,15 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
         chart_para.paragraph_format.space_before = Pt(0)
         chart_para.paragraph_format.space_after = Pt(4)
         run = chart_para.add_run()
-        run.add_picture(chart_img, width=Inches(4.5))
+        run.add_picture(chart_img, width=Inches(3.2))
     
     # OBSERVATIONS SECTION
     obs_heading = doc.add_heading("Observations:", level=2)
     obs_heading.style.font.size = Pt(11)
     obs_heading.style.font.bold = True
     obs_heading.style.font.color.rgb = RGBColor(0, 51, 102)
-    obs_heading.paragraph_format.space_before = Pt(4)
-    obs_heading.paragraph_format.space_after = Pt(2)
+    obs_heading.paragraph_format.space_before = Pt(2)
+    obs_heading.paragraph_format.space_after = Pt(1)
     
     subtitle = doc.add_paragraph("The table gives an overview of child's involvement and performance across co-curricular areas.")
     subtitle.style.font.size = Pt(9)
@@ -708,10 +711,9 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
         for cell in row:
             for paragraph in cell.paragraphs:
                 for run in paragraph.runs:
-                    run.font.size = Pt(9)
+                    run.font.size = Pt(8.5)
     
-    # PAGE BREAK - NOW PAGE 1 IS COMPLETE WITH ALL OBSERVATIONS
-    doc.add_page_break()
+    # REMOVED PAGE BREAK TO FIT ON SINGLE PAGE
     
     # ========================================
     # PAGE 2: RECOMMENDATIONS, TIPS, CONCLUSION, NOTES
@@ -722,8 +724,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     rec_heading.style.font.size = Pt(11)
     rec_heading.style.font.bold = True
     rec_heading.style.font.color.rgb = RGBColor(0, 51, 102)
-    rec_heading.paragraph_format.space_before = Pt(4)
-    rec_heading.paragraph_format.space_after = Pt(2)
+    rec_heading.paragraph_format.space_before = Pt(2)
+    rec_heading.paragraph_format.space_after = Pt(1)
     
     rec_subtitle = doc.add_paragraph("Here are some ways to turn your child's interests into long-term strengths:")
     rec_subtitle.style.font.size = Pt(9)
@@ -764,7 +766,7 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
         # Set font size for columns 1
         for paragraph in row[0].paragraphs:
             for run in paragraph.runs:
-                run.font.size = Pt(9)
+                run.font.size = Pt(8.5)
     
     # Small space
     space_para = doc.add_paragraph()
@@ -775,8 +777,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     tips_heading.style.font.size = Pt(11)
     tips_heading.style.font.bold = True
     tips_heading.style.font.color.rgb = RGBColor(0, 51, 102)
-    tips_heading.paragraph_format.space_before = Pt(4)
-    tips_heading.paragraph_format.space_after = Pt(2)
+    tips_heading.paragraph_format.space_before = Pt(2)
+    tips_heading.paragraph_format.space_after = Pt(1)
     
     for i, tip in enumerate(analysis.get("parent_tips", []), 1):
         tip_para = doc.add_paragraph(f"{i}. {tip}")
@@ -793,8 +795,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     conclusion_heading.style.font.size = Pt(11)
     conclusion_heading.style.font.bold = True
     conclusion_heading.style.font.color.rgb = RGBColor(0, 51, 102)
-    conclusion_heading.paragraph_format.space_before = Pt(4)
-    conclusion_heading.paragraph_format.space_after = Pt(2)
+    conclusion_heading.paragraph_format.space_before = Pt(2)
+    conclusion_heading.paragraph_format.space_after = Pt(1)
     
     conclusion_para = doc.add_paragraph(analysis.get("conclusion", ""))
     conclusion_para.style.font.size = Pt(9)
@@ -810,8 +812,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     notes_heading.style.font.size = Pt(11)
     notes_heading.style.font.bold = True
     notes_heading.style.font.color.rgb = RGBColor(0, 51, 102)
-    notes_heading.paragraph_format.space_before = Pt(4)
-    notes_heading.paragraph_format.space_after = Pt(2)
+    notes_heading.paragraph_format.space_before = Pt(2)
+    notes_heading.paragraph_format.space_after = Pt(1)
 
     # Create a 2-row, 1-column table for the Notes section with borders
     notes_table = doc.add_table(rows=2, cols=1)
@@ -842,6 +844,9 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     run2.bold = True
     run2.font.size = Pt(10)
     
+    if not save:
+        return doc
+        
     # Save document with consistent timestamp
     safe_name = "".join([c for c in student_name if c.isalnum() or c==' ']).strip()
     output_path = f"{target_folder}/{safe_name}_Report.docx"
@@ -856,6 +861,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
         alt_path = f"{target_folder}/{safe_name}_Report_{timestamp}.docx"
         doc.save(alt_path)
         print(f"✓ Saved as: {safe_name}_Report_{timestamp}.docx instead")
+        
+    return doc
 
 # =========================
 # MAIN
