@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from main import generate_llm_analysis, create_word_doc
+from main import generate_llm_analysis, create_word_doc, create_spider_chart
 from src.data_loader import load_and_process_data
 from auth import router as auth_router, get_current_user, get_db, init_db
 from urllib.parse import urlparse
@@ -185,21 +185,28 @@ async def generate_reports(
 
         final_class_name = internal_class if internal_class else os.path.splitext(file.filename)[0]
 
+        # Initialize a single consolidated document using the updated template
+        template_path = os.path.join(os.path.dirname(__file__), 'updatedTemplate.docx')
         from docx import Document
         from docx.shared import Inches
         
-        # Initialize a single consolidated document
-        consolidated_doc = Document()
-        
-        # Set narrow margins once for the consolidated doc
-        sections = consolidated_doc.sections
-        for section in sections:
-            section.top_margin = Inches(0.5)
-            section.bottom_margin = Inches(0.5)
-            section.left_margin = Inches(0.6)
-            section.right_margin = Inches(0.6)
-
-        final_class_name = internal_class if internal_class else os.path.splitext(file.filename)[0]
+        if os.path.exists(template_path):
+            consolidated_doc = Document(template_path)
+            # Clear existing body content but keep section properties (headers/margins)
+            body = consolidated_doc.element.body
+            for child in list(body):
+                if not child.tag.endswith('sectPr'):
+                    body.remove(child)
+        else:
+            # Fallback if template is missing
+            consolidated_doc = Document()
+            # Set narrow margins once for the consolidated doc
+            sections = consolidated_doc.sections
+            for section in sections:
+                section.top_margin = Inches(0.5)
+                section.bottom_margin = Inches(0.5)
+                section.left_margin = Inches(0.6)
+                section.right_margin = Inches(0.6)
 
         # Generate reports into the single document
         for idx, student in enumerate(students, 1):
@@ -208,7 +215,7 @@ async def generate_reports(
             if analysis:
                 # Pass the consolidated_doc to be appended to
                 create_word_doc(name, analysis, final_class_name, student, class_avg, 
-                                doc=consolidated_doc, save=False)
+                                doc=consolidated_doc, save=False, is_first=(idx==1))
             else:
                 print(f"Failed to generate analysis for: {name}")
 

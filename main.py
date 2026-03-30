@@ -578,7 +578,7 @@ OUTPUT FORMAT (JSON ONLY)
 # =========================
 # WORD REPORT CREATION
 # =========================
-def create_word_doc(student_name, analysis, class_name, student_data, class_avg_data, output_dir=None, doc=None, save=True):
+def create_word_doc(student_name, analysis, class_name, student_data, class_avg_data, output_dir=None, doc=None, save=True, is_first=False):
     if doc is None:
         doc = Document()
         # Set narrow margins (only for new document)
@@ -588,8 +588,8 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
             section.bottom_margin = Inches(0.5)
             section.left_margin = Inches(0.6)
             section.right_margin = Inches(0.6)
-    else:
-        # Add page break before adding new student if appending to existing doc
+    elif not is_first:
+        # Add page break before adding new student if appending to existing doc and NOT the first student
         doc.add_page_break()
     
     # Use specified output_dir or fallback to global constant
@@ -696,7 +696,7 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
 
     hdr = obs_table.rows[0]
     hdr.cells[0].text = "Interest Area"
-    hdr.cells[1].text = "%"
+    hdr.cells[1].text = "Engagement (%)"
     hdr.cells[2].text = "Interest Level"
     hdr.cells[3].text = "Key Observations"
     style_table_header(hdr, bg_color="1F5E78")
@@ -740,7 +740,7 @@ def create_word_doc(student_name, analysis, class_name, student_data, class_avg_
     # Header Row with 3 columns
     hdr = rec_table.rows[0]
     hdr.cells[0].text = "Strong Interest Area"
-    hdr.cells[1].text = "Potential Careers Examples"
+    hdr.cells[1].text = "Potential Careers"
     hdr.cells[2].text = "Simple Activities to Support"
     style_table_header(hdr, bg_color="1F5E78")
 
