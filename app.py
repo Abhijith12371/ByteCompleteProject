@@ -25,6 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:5174",
         "https://byte-report-generator.netlify.app",
         "https://byte-report-generator.netlify.app/"
     ],
@@ -186,7 +187,7 @@ async def generate_reports(
         final_class_name = internal_class if internal_class else os.path.splitext(file.filename)[0]
 
         # Initialize a single consolidated document using the updated template
-        template_path = os.path.join(os.path.dirname(__file__), 'updatedTemplate.docx')
+        template_path = os.path.join(os.path.dirname(__file__), 'sample template to upload.docx')
         from docx import Document
         from docx.shared import Inches
         
